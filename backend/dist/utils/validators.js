@@ -1,5 +1,3 @@
-// import { Request, Response, NextFunction } from "express";
-// import { ValidationChain, body, validationResult } from "express-validator";
 import { body, validationResult } from "express-validator";
 const validate = (validations) => {
     return async (req, res, next) => {
@@ -25,11 +23,14 @@ const loginValidator = [
 const signupValidator = [
     body("name").not().isEmpty().withMessage("name is required"),
     ...loginValidator,
-    //   body("email").trim().isEmail().withMessage("Invalid email format"), 
+    //   body("email").trim().isEmail().withMessage("Invalid email format"),
     //   body("password")
     //     .trim()
     //     .isLength({ min: 6 })
     //     .withMessage("password should at least have 6 characters"),
 ];
-export { validate, signupValidator, loginValidator };
+const chatCompletionValidator = [
+    body("message").notEmpty().withMessage("message is required"),
+];
+export { validate, signupValidator, loginValidator, chatCompletionValidator };
 //# sourceMappingURL=validators.js.map

@@ -85,26 +85,53 @@ export const userLogin = async (
 
     res.clearCookie(COOKIE_NAME,{
       domain: "localhost", 
-      httpOnly: true,
+      // httpOnly: true,
       signed: true,
       path:"/",
       });
 
     //create token
-    const token = createToken(user._id.toString(), user.email, "7d");
-    const expires=new Date();
-    expires.setDate(expires.getDate()+7);
+    const token = createToken(user._id.toString(), user.email, "1y");
+    // const expires=new Date();
+    const expires = new Date(); expires.setFullYear(expires.getFullYear() + 1);
+    
     res.cookie(COOKIE_NAME,token,{
       path:"/", 
       domain: "localhost", 
       expires,
-      httpOnly: true,
-      signed: true,
+      // httpOnly: true,
+      // signed: true,
+      // sameSite: false,
+      secure: false,
+      maxAge: 365 * 24 * 60 * 60 * 1000,
       }
     );
     
     return res.status(200).json({ message: "OK", id: user.name.toString() });
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const verifyUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    //user token check
+    const user = await User.findById(res.locals.jwtData.id);
+    if (!user) {
+      return res.status(401).send("User not registered OR Token malfunctioned");
+    }
+    if (user._id.toString() !== res.locals.jwtData.id) {
+      return res.status(401).send("Permissions didn't match");
+    }
+    return res
+      .status(200)
+      .json({ message: "OK", name: user.name, email: user.email });
+  } catch (error) {
+    console.log(error);
+    return res.status(200).json({ message: "ERROR", cause: error.message });
   }
 };
